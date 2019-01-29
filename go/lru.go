@@ -142,9 +142,9 @@ func _add(cache *LRUCache, k lrukey, v lruvalue, notinc bool) {
 		cache.len += 1
 		if cache.len > cache.cap {
 			// 为提高效率，每次从头部淘汰整体的1/4
-			expires := cache.cap << 2
+			expires := cache.cap >> 2
 			for i:=0; i<expires; i++ {
-				movekey := cache.head.key // 找到对应的key
+				movekey := cache.head.next.key // 找到对应的key
 				delete(cache.dict, movekey) // 一定要把map里的key给删除
 
 				// head指针后移一位
@@ -193,3 +193,35 @@ func _find(cache *LRUCache, k lrukey, v lruvalue) lruvalue {
 	}
 	return nil // 没有命中返回nil
 }
+
+// test unit
+//func main() {
+//	//var cache lrufuncs
+//	var cache = &lru.LRUCache{}
+//	//cache = cache0
+//	cache.Create(10)
+//
+//	cache.Add(10, 10)
+//	//fmt.Println(cache.Find(10))
+//	for i:=1; i<9; i++ {
+//		cache.Add(i, i)
+//	}
+//
+//	iter := cache.Iterator(true)
+//	for i:=0; i<cache.Size(); i++ {
+//		fmt.Println(iter())
+//	}
+//
+//	fmt.Println()
+//
+//	cache.Add("hhhh", 10)
+//	cache.Add(10, "hhhhh")
+//	//fmt.Println(cache.Find(10))
+//	//fmt.Println(cache.Size())
+//
+//	iter2 := cache.Iterator(true)
+//
+//	for i:=0; i<cache.Size(); i++ {
+//		fmt.Println(iter2())
+//	}
+//}
