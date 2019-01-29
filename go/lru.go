@@ -25,7 +25,7 @@ type lrunode struct {
 	由一个map和一个双向链表组成
 	可将查找、添加等操作的时间复杂度较少到O(1) (理论上，取决于map的实现)
  */
-type lrucache struct {
+type LRUCache struct {
 	head *lrunode 						// 头指针
 	tail *lrunode						// 尾指针
 	dict map[lrukey] *lrunode			// 存放数据的map，提高查找效率
@@ -38,7 +38,7 @@ type lrucache struct {
 	创建缓存
 	cap: 容量，缓存最多存多少数据
  */
-func (cache *lrucache) create(cap int) {
+func (cache *LRUCache) Create(cap int) {
 	// 初始化尾指针
 	cache.tail = &lrunode{
 		next: nil,
@@ -68,7 +68,7 @@ func (cache *lrucache) create(cap int) {
 
 	cost: O(1)(base on map's implement)
  */
-func (cache *lrucache) add(k lrukey, v lruvalue) {
+func (cache *LRUCache) Add(k lrukey, v lruvalue) {
 	cache.mutex.Lock()
 	defer cache.mutex.Unlock()
 	// 先查找是否在缓存里，如果有就不添加了
@@ -86,7 +86,7 @@ func (cache *lrucache) add(k lrukey, v lruvalue) {
 
 	cost: O(1)(base on map's implement)
  */
-func (cache *lrucache) find(k lrukey) lruvalue {
+func (cache *LRUCache) Find(k lrukey) lruvalue {
 	cache.mutex.Lock()
 	defer cache.mutex.Unlock()
 	return _find(cache, k, nil)
@@ -98,7 +98,7 @@ func (cache *lrucache) find(k lrukey) lruvalue {
 
 	cost: O(1)
  */
-func (cache *lrucache) size() int {
+func (cache *LRUCache) Size() int {
 	cache.mutex.RLock()
 	defer cache.mutex.RUnlock()
 	return cache.len
@@ -110,7 +110,7 @@ func (cache *lrucache) size() int {
 	reverse: 是否翻转 true = 正序 false = 倒序(默认，淘汰的是从头部，所以从后往前是默认)
 	return: 迭代器 func
  */
-func (cache lrucache) iterator(reverse bool) func() lruvalue {
+func (cache LRUCache) Iterator(reverse bool) func() lruvalue {
 	var p *lrunode
 	if reverse {
 		p = cache.head
@@ -137,7 +137,7 @@ func (cache lrucache) iterator(reverse bool) func() lruvalue {
 	v: value
 	notinc: 是否增加 如果命中的话，只是移动位置，不需要增加size
  */
-func _add(cache *lrucache, k lrukey, v lruvalue, notinc bool) {
+func _add(cache *LRUCache, k lrukey, v lruvalue, notinc bool) {
 	if !notinc {
 		cache.len += 1
 		if cache.len > cache.cap {
@@ -174,7 +174,7 @@ func _add(cache *lrucache, k lrukey, v lruvalue, notinc bool) {
 	v: value add有find操作，有可能改变value
 	return: 找到的value or nil
  */
-func _find(cache *lrucache, k lrukey, v lruvalue) lruvalue {
+func _find(cache *LRUCache, k lrukey, v lruvalue) lruvalue {
 	old, ok := cache.dict[k]
 	if ok {
 		// 命中，将此node移到双向链表的末尾
