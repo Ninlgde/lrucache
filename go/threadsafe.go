@@ -70,7 +70,6 @@ func (cache *threadSafeLRU) Size() int {
 
 /**
 遍历缓存中所有的数据的迭代器
-不清楚是否需要加锁
 reverse: 是否翻转 true = 正序 false = 倒序(默认，淘汰的是从头部，所以从后往前是默认)
 return: 迭代器 func
 
