@@ -96,8 +96,8 @@ func (cache *threadUnsafeLRU) Size() int {
 reverse: 是否翻转 true = 正序 false = 倒序(默认，淘汰的是从头部，所以从后往前是默认)
 return: 迭代器 func
 */
-func (cache threadUnsafeLRU) Iterator(reverse bool) *Iterator {
-	iterator, ch, stopCh := newIterator()
+func (cache *threadUnsafeLRU) Iterator(reverse bool) *Iterator {
+	iterator, ch, stopCh := newIterator(cache.cap)
 	go func() {
 		if cache.len == 0 {
 			close(ch)
@@ -131,8 +131,8 @@ func (cache threadUnsafeLRU) Iterator(reverse bool) *Iterator {
 	return iterator
 }
 
-func (cache threadUnsafeLRU) Iter(reverse bool) <-chan lruPair {
-	ch := make(chan lruPair)
+func (cache *threadUnsafeLRU) Iter(reverse bool) <-chan lruPair {
+	ch := make(chan lruPair, cache.cap)
 	go func() {
 		if cache.len == 0 {
 			close(ch)

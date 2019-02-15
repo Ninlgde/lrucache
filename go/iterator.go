@@ -16,8 +16,8 @@ func (i *Iterator) Stop() {
 	}
 }
 
-func newIterator() (*Iterator, chan<- lruPair, <-chan struct{}) {
-	itemChan := make(chan lruPair)
+func newIterator(cap int) (*Iterator, chan<- lruPair, <-chan struct{}) {
+	itemChan := make(chan lruPair, cap)
 	stopChan := make(chan struct{})
 	return &Iterator{
 		C:    itemChan,

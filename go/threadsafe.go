@@ -75,8 +75,8 @@ return: 迭代器 func
 
 测试方法，正式不支持
 */
-func (cache threadSafeLRU) Iterator(reverse bool) *Iterator {
-	iterator, ch, stopCh := newIterator()
+func (cache *threadSafeLRU) Iterator(reverse bool) *Iterator {
+	iterator, ch, stopCh := newIterator(cache.C.cap)
 	go func() {
 		cache.RLock()
 		defer cache.RUnlock()
@@ -112,8 +112,8 @@ func (cache threadSafeLRU) Iterator(reverse bool) *Iterator {
 	return iterator
 }
 
-func (cache threadSafeLRU) Iter(reverse bool) <-chan lruPair {
-	ch := make(chan lruPair)
+func (cache *threadSafeLRU) Iter(reverse bool) <-chan lruPair {
+	ch := make(chan lruPair, cache.C.cap) // 这里需要设置channel大小
 	go func() {
 		cache.RLock()
 		defer cache.RUnlock()
