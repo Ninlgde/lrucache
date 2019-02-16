@@ -1,7 +1,6 @@
 package lru
 
 import (
-	"fmt"
 	"github.com/deckarep/golang-set"
 	"math/rand"
 	"runtime"
@@ -95,7 +94,6 @@ func TestThreadSafeLRU_Iterator_Concurrent(t *testing.T) {
 		count += len(iter.C)
 	}
 
-	fmt.Println(count)
 	Assert(count < N*N, t)
 	Assert(count > (1+N)*N/4, t)
 }
@@ -128,34 +126,33 @@ func TestThreadSafeLRU_Iter_Concurrent(t *testing.T) {
 		count += len(iter)
 	}
 
-	fmt.Println(count)
 	Assert(count < N*N, t)
 	Assert(count > (1+N)*N/4, t)
 }
 
-func TestSet(t *testing.T) {
-	runtime.GOMAXPROCS(2)
-
-	s := mapset.NewSet()
-	ints := rand.Perm(N)
-
-	//cs := make([]<-chan interface{}, 0)
-	var wg sync.WaitGroup
-	wg.Add(len(ints) * 2)
-	for i := 0; i < len(ints); i++ {
-		go func(i int) {
-			s.Add(i)
-			wg.Done()
-		}(i)
-		go func(i int) {
-			//iter := s.Iter()
-			//cs = append(cs, iter)
-			s.Remove(i)
-			wg.Done()
-		}(i)
-	}
-	//for i := 0; i < len(ints); i++ {
-	//}
-	wg.Wait()
-	fmt.Println(s.Cardinality())
-}
+//func TestSet(t *testing.T) {
+//	runtime.GOMAXPROCS(2)
+//
+//	s := mapset.NewSet()
+//	ints := rand.Perm(N)
+//
+//	//cs := make([]<-chan interface{}, 0)
+//	var wg sync.WaitGroup
+//	wg.Add(len(ints) * 2)
+//	for i := 0; i < len(ints); i++ {
+//		go func(i int) {
+//			s.Add(i)
+//			wg.Done()
+//		}(i)
+//		go func(i int) {
+//			//iter := s.Iter()
+//			//cs = append(cs, iter)
+//			s.Remove(i)
+//			wg.Done()
+//		}(i)
+//	}
+//	//for i := 0; i < len(ints); i++ {
+//	//}
+//	wg.Wait()
+//	fmt.Println(s.Cardinality())
+//}
