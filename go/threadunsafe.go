@@ -92,6 +92,20 @@ func (cache *threadUnsafeLRU) Size() int {
 }
 
 /**
+删除一个元素
+k: key
+return: value or nil
+*/
+func (cache *threadUnsafeLRU) Remove(k lruKey) lruValue {
+	node := cache.find(k, nil) // this step will move k to tail
+	if node == nil {
+		return nil
+	}
+	// k in cache
+	return cache.poptail(k)
+}
+
+/**
 遍历缓存中所有的数据的迭代器
 reverse: 是否翻转 true = 正序 false = 倒序(默认，淘汰的是从头部，所以从后往前是默认)
 return: 迭代器 func
@@ -171,8 +185,8 @@ func (cache *threadUnsafeLRU) add(k lruKey, v lruValue, notinc bool) {
 			// 为提高效率，每次从头部淘汰整体的1/4
 			expires := cache.cap >> 2
 			for i := 0; i < expires; i++ {
-				movekey := cache.head.next.key // 找到对应的key
-				delete(cache.dict, movekey)    // 一定要把map里的key给删除
+				rmkey := cache.head.next.key // 找到对应的key
+				delete(cache.dict, rmkey)    // 一定要把map里的key给删除
 
 				// head指针后移一位
 				cache.head.next = cache.head.next.next
@@ -205,6 +219,7 @@ func (cache *threadUnsafeLRU) find(k lruKey, v lruValue) lruValue {
 	old, ok := cache.dict[k]
 	if ok {
 		// 命中，将此node移到双向链表的末尾
+		// 1.先从原位置删除
 		node := old
 		node.prev.next = node.next // 前的后是后
 		node.next.prev = node.prev // 后的前是前
@@ -215,8 +230,30 @@ func (cache *threadUnsafeLRU) find(k lruKey, v lruValue) lruValue {
 			new = v
 		}
 
+		// 2.再添加到尾部
 		cache.add(k, new, true) // 因为命中了 所以size不自增
 		return node.value
 	}
 	return nil // 没有命中返回nil
+}
+
+/**
+从尾部pop出一个node
+cache: 缓存
+k: key
+return: pop的value or nil(空表时)
+*/
+func (cache *threadUnsafeLRU) poptail(k lruKey) lruValue {
+	if cache.len == 0 {
+		return nil
+	}
+	node := cache.tail.prev
+	rmkey := node.key
+	delete(cache.dict, rmkey)
+	// tail 指针向前移动一位
+	cache.tail.prev = node.prev
+	node.prev.next = cache.tail
+
+	cache.len--
+	return node.value
 }

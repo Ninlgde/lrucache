@@ -110,6 +110,25 @@ func TestThreadSafeLRU_Find_Core(t *testing.T) {
 	AssertPairList(except, result, t)
 }
 
+func TestThreadSafeLRU_Remove(t *testing.T) {
+	a := NewLRUCache(10)
+
+	v3 := &struct{}{}
+	a.Add(1, 1)
+	a.Add(2, "two")
+	a.Add(3, v3)
+
+	Assert(a.Remove(3) == v3, t)
+	Assert(a.Find(3) == nil, t)
+	Assert(a.Size() == 2, t)
+	Assert(a.Remove(3) == nil, t)
+	Assert(a.Size() == 2, t)
+
+	Assert(a.Remove(2) == "two", t)
+	Assert(a.Remove(1) == 1, t)
+	Assert(a.Size() == 0, t)
+}
+
 func TestThreadSafeLRU_Create(t *testing.T) {
 	a := NewLRUCache(10)
 	for i := 0; i <= 10; i++ {
@@ -202,6 +221,8 @@ func TestNewThreadUnsafeLRUCache(t *testing.T) {
 //func TestThreadUnsafeLRU_Find(t *testing.T)
 //
 //func TestThreadUnsafeLRU_Find_Core(t *testing.T)
+//
+//func TestThreadUnsafeLRU_Remove(t *testing.T)
 //
 //func TestThreadUnsafeLRU_Create(t *testing.T)
 

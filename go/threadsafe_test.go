@@ -66,6 +66,38 @@ func TestThreadSafeLRU_Find_Concurrent(t *testing.T) {
 	Assert(!result.Contains(N), t)
 }
 
+func TestThreadSafeLRU_Remove_Concurrent(t *testing.T) {
+	runtime.GOMAXPROCS(2)
+
+	a := NewLRUCache(CAP)
+	ints := rand.Perm(N)
+
+	for i := 0; i < len(ints); i++ {
+		a.Add(i, i)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(ints))
+	result := mapset.NewSet() // concurrent set
+	for _, i := range ints {
+		go func(i int) {
+			result.Add(a.Remove(i))
+			wg.Done()
+		}(i)
+	}
+	wg.Wait()
+
+	Assert(a.Size() == 0, t)
+	Assert(result.Cardinality() == N, t)
+
+	for _, i := range ints {
+		Assert(result.Contains(i), t)
+		Assert(a.Find(i) == nil, t)
+	}
+
+	Assert(!result.Contains(N), t)
+}
+
 func TestThreadSafeLRU_Iterator_Concurrent(t *testing.T) {
 	runtime.GOMAXPROCS(2)
 
@@ -129,30 +161,3 @@ func TestThreadSafeLRU_Iter_Concurrent(t *testing.T) {
 	Assert(count < N*N, t)
 	Assert(count > (1+N)*N/4, t)
 }
-
-//func TestSet(t *testing.T) {
-//	runtime.GOMAXPROCS(2)
-//
-//	s := mapset.NewSet()
-//	ints := rand.Perm(N)
-//
-//	//cs := make([]<-chan interface{}, 0)
-//	var wg sync.WaitGroup
-//	wg.Add(len(ints) * 2)
-//	for i := 0; i < len(ints); i++ {
-//		go func(i int) {
-//			s.Add(i)
-//			wg.Done()
-//		}(i)
-//		go func(i int) {
-//			//iter := s.Iter()
-//			//cs = append(cs, iter)
-//			s.Remove(i)
-//			wg.Done()
-//		}(i)
-//	}
-//	//for i := 0; i < len(ints); i++ {
-//	//}
-//	wg.Wait()
-//	fmt.Println(s.Cardinality())
-//}

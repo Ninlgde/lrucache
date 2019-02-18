@@ -58,8 +58,6 @@ func (cache *threadSafeLRU) Find(k lruKey) lruValue {
 return: size of cache
 
 cost: O(1)
-
-测试方法，正式不支持
 */
 func (cache *threadSafeLRU) Size() int {
 	cache.RLock()
@@ -68,11 +66,22 @@ func (cache *threadSafeLRU) Size() int {
 }
 
 /**
+删除一个元素
+k: key
+return: value or nil
+
+cost: O(1)
+*/
+func (cache *threadSafeLRU) Remove(k lruKey) lruValue {
+	cache.Lock()
+	defer cache.Unlock()
+	return cache.c.Remove(k)
+}
+
+/**
 遍历缓存中所有的数据的迭代器
 reverse: 是否翻转 true = 正序 false = 倒序(默认，淘汰的是从头部，所以从后往前是默认)
 return: 迭代器 func
-
-测试方法，正式不支持
 */
 func (cache *threadSafeLRU) Iterator(reverse bool) *Iterator {
 	iterator, ch, stopCh := newIterator(cache.c.cap)
