@@ -197,7 +197,7 @@ func (cache *threadUnsafeLRU) add(k lruKey, v lruValue, notinc bool) {
 
 			// head指针后移一位
 			cache.head.next = rmnode.next
-			cache.head.prev = cache.head
+			cache.head.next.prev = cache.head
 
 			deleteNode(rmnode)
 			//}
