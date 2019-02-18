@@ -13,7 +13,7 @@ $ go get -u github.com/Ninlgde/lrucache
 2. Import it in your code:
 
 ```go
-import "github.com/Ninlgde/lrucache/go
+import "github.com/Ninlgde/lrucache/go"
 ```
 
 ## Quick start
@@ -57,3 +57,24 @@ func main() {
 ```
 
 more example see the test go files
+
+## Benchmark
+Benchmark on MacBook Pro 2018
+
+```
+goos: darwin
+goarch: amd64
+pkg: github.com/Ninlgde/lrucache/go
+BenchmarkThreadSafeLRU_Add-12           	 5000000	       309 ns/op
+BenchmarkThreadSafeLRU_Size-12          	30000000	        43.0 ns/op
+BenchmarkThreadSafeLRU_Find-12          	10000000	       227 ns/op
+BenchmarkThreadSafeLRU_Find2-12         	10000000	       295 ns/op
+BenchmarkThreadSafeLRU_Iterator-12      	   10000	    171471 ns/op
+BenchmarkThreadSafeLRU_Itera-12         	   10000	    185410 ns/op
+BenchmarkThreadUnsafeLRU_Add-12         	 5000000	       292 ns/op
+BenchmarkThreadUnsafeLRU_Size-12        	2000000000	         1.56 ns/op
+BenchmarkThreadUnsafeLRU_Find-12        	10000000	       191 ns/op
+BenchmarkThreadUnsafeLRU_Find2-12       	10000000	       178 ns/op
+BenchmarkThreadUnsafeLRU_Iterator-12    	   10000	    141394 ns/op
+BenchmarkThreadUnsafeLRU_Iter-12        	   10000	    135945 ns/op
+```
