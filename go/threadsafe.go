@@ -1,6 +1,5 @@
 package lru
 
-import "C"
 import (
 	"sync"
 )
@@ -11,7 +10,7 @@ LRU 缓存
 可将查找、添加等操作的时间复杂度较少到O(1) (理论上，取决于map的实现)
 */
 type threadSafeLRU struct {
-	C            *threadUnsafeLRU
+	c            *threadUnsafeLRU
 	sync.RWMutex // 协程锁
 }
 
@@ -24,8 +23,8 @@ func newThreadSafeLRU() *threadSafeLRU {
 cap: 容量，缓存最多存多少数据
 */
 func (cache *threadSafeLRU) Create(cap int) {
-	cache.C = newThreadUnsafeLRU()
-	cache.C.Create(cap)
+	cache.c = newThreadUnsafeLRU()
+	cache.c.Create(cap)
 }
 
 /**
@@ -38,7 +37,7 @@ cost: O(1)(base on map's implement)
 func (cache *threadSafeLRU) Add(k lruKey, v lruValue) {
 	cache.Lock()
 	defer cache.Unlock()
-	cache.C.Add(k, v)
+	cache.c.Add(k, v)
 }
 
 /**
@@ -51,7 +50,7 @@ cost: O(1)(base on map's implement)
 func (cache *threadSafeLRU) Find(k lruKey) lruValue {
 	cache.Lock()
 	defer cache.Unlock()
-	return cache.C.Find(k)
+	return cache.c.Find(k)
 }
 
 /**
@@ -65,7 +64,7 @@ cost: O(1)
 func (cache *threadSafeLRU) Size() int {
 	cache.RLock()
 	defer cache.RUnlock()
-	return cache.C.Size()
+	return cache.c.Size()
 }
 
 /**
@@ -76,18 +75,18 @@ return: 迭代器 func
 测试方法，正式不支持
 */
 func (cache *threadSafeLRU) Iterator(reverse bool) *Iterator {
-	iterator, ch, stopCh := newIterator(cache.C.cap)
+	iterator, ch, stopCh := newIterator(cache.c.cap)
 	go func() {
 		cache.RLock()
 		defer cache.RUnlock()
-		if cache.C.len == 0 {
+		if cache.c.len == 0 {
 			close(ch)
 			return
 		}
 		if reverse {
-			p := cache.C.head.next
+			p := cache.c.head.next
 		LT:
-			for p != cache.C.tail && p != nil {
+			for p != cache.c.tail && p != nil {
 				select {
 				case <-stopCh:
 					break LT
@@ -96,9 +95,9 @@ func (cache *threadSafeLRU) Iterator(reverse bool) *Iterator {
 				p = p.next
 			}
 		} else {
-			p := cache.C.tail.prev
+			p := cache.c.tail.prev
 		LF:
-			for p != cache.C.head {
+			for p != cache.c.head {
 				select {
 				case <-stopCh:
 					break LF
@@ -113,23 +112,23 @@ func (cache *threadSafeLRU) Iterator(reverse bool) *Iterator {
 }
 
 func (cache *threadSafeLRU) Iter(reverse bool) <-chan lruPair {
-	ch := make(chan lruPair, cache.C.cap) // 这里需要设置channel大小
+	ch := make(chan lruPair, cache.c.cap) // 这里需要设置channel大小
 	go func() {
 		cache.RLock()
 		defer cache.RUnlock()
-		if cache.C.len == 0 {
+		if cache.c.len == 0 {
 			close(ch)
 			return
 		}
 		if reverse {
-			p := cache.C.head.next
-			for p != cache.C.tail {
+			p := cache.c.head.next
+			for p != cache.c.tail {
 				ch <- lruPair{p.key, p.value}
 				p = p.next
 			}
 		} else {
-			p := cache.C.tail.prev
-			for p != cache.C.head {
+			p := cache.c.tail.prev
+			for p != cache.c.head {
 				ch <- lruPair{p.key, p.value}
 				p = p.prev
 			}
