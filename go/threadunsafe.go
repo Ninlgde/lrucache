@@ -183,18 +183,24 @@ func (cache *threadUnsafeLRU) add(k lruKey, v lruValue, notinc bool) {
 		cache.len += 1
 		if cache.len > cache.cap {
 			// 为提高效率，每次从头部淘汰整体的1/4
-			expires := cache.cap >> 2
-			for i := 0; i < expires; i++ {
-				rmnode := cache.head.next
-				rmkey := rmnode.key       // 找到对应的key
-				delete(cache.dict, rmkey) // 一定要把map里的key给删除
+			//expires := cache.cap >> 2
 
-				// head指针后移一位
-				cache.head.next = rmnode.next
-				cache.head.prev = cache.head
+			// 思考：如果淘汰的时候淘汰1/4。。虽然淘汰的次数少了，但是淘汰的那一次会从O(1)的操作增加到O(n/4)
+			// 如果n特别特别大，那么这一次的操作会非常耗时。平均是O(2)
+			// 如果改回满了，删一次，那么满了之后的增加多了一次删除操作，大约是O(2)
+			// 综上，还是选择每次删除一个。
+			expires := 1
+			//for i := 0; i < expires; i++ {
+			rmnode := cache.head.next
+			rmkey := rmnode.key       // 找到对应的key
+			delete(cache.dict, rmkey) // 一定要把map里的key给删除
 
-				deleteNode(rmnode)
-			}
+			// head指针后移一位
+			cache.head.next = rmnode.next
+			cache.head.prev = cache.head
+
+			deleteNode(rmnode)
+			//}
 			cache.len -= expires // size减小到删除后的真实size
 		}
 	}

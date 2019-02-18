@@ -65,18 +65,34 @@ Benchmark on MacBook Pro 2018
 goos: darwin
 goarch: amd64
 pkg: github.com/Ninlgde/lrucache/go
-BenchmarkThreadSafeLRU_Add-12           	 5000000	       266 ns/op
-BenchmarkThreadSafeLRU_Size-12          	30000000	        41.7 ns/op
-BenchmarkThreadSafeLRU_Find-12          	10000000	       224 ns/op
-BenchmarkThreadSafeLRU_Find2-12         	10000000	       235 ns/op
-BenchmarkThreadSafeLRU_Remove-12        	10000000	       229 ns/op
-BenchmarkThreadSafeLRU_Iterator-12      	   10000	    136736 ns/op
-BenchmarkThreadSafeLRU_Itera-12         	   10000	    139522 ns/op
-BenchmarkThreadUnsafeLRU_Add-12         	10000000	       204 ns/op
-BenchmarkThreadUnsafeLRU_Size-12        	2000000000	         1.50 ns/op
-BenchmarkThreadUnsafeLRU_Find-12        	20000000	       181 ns/op
-BenchmarkThreadUnsafeLRU_Find2-12       	10000000	       175 ns/op
-BenchmarkThreadUnsafeLRU_Remove-12      	10000000	       175 ns/op
-BenchmarkThreadUnsafeLRU_Iterator-12    	   10000	    141598 ns/op
-BenchmarkThreadUnsafeLRU_Iter-12        	   10000	    135848 ns/op
+BenchmarkThreadSafeLRU_Add-12            	 1000000	      1289 ns/op
+BenchmarkThreadSafeLRU_Add2-12           	 1000000	      1309 ns/op
+BenchmarkThreadSafeLRU_Add3-12           	 3000000	       551 ns/op
+BenchmarkThreadSafeLRU_Size-12           	30000000	        42.0 ns/op
+BenchmarkThreadSafeLRU_Size2-12          	30000000	        45.0 ns/op
+BenchmarkThreadSafeLRU_Find-12           	10000000	       227 ns/op
+BenchmarkThreadSafeLRU_Find2-12          	10000000	       240 ns/op
+BenchmarkThreadSafeLRU_Find3-12          	20000000	        82.1 ns/op
+BenchmarkThreadSafeLRU_Remove-12         	10000000	       219 ns/op
+BenchmarkThreadSafeLRU_Remove2-12        	10000000	       230 ns/op
+BenchmarkThreadSafeLRU_Remove3-12        	20000000	        79.0 ns/op
+BenchmarkThreadSafeLRU_Iterator-12       	   10000	    140919 ns/op
+BenchmarkThreadSafeLRU_Iterator2-12      	 1000000	      2189 ns/op
+BenchmarkThreadSafeLRU_Itera-12          	   10000	    133793 ns/op
+BenchmarkThreadSafeLRU_Itera2-12         	 1000000	      1734 ns/op
+BenchmarkThreadUnsafeLRU_Add-12          	 2000000	       965 ns/op
+BenchmarkThreadUnsafeLRU_Add2-12         	 1000000	      1013 ns/op
+BenchmarkThreadUnsafeLRU_Add3-12         	 3000000	       443 ns/op
+BenchmarkThreadUnsafeLRU_Size-12         	2000000000	         1.50 ns/op
+BenchmarkThreadUnsafeLRU_Size2-12        	2000000000	         1.49 ns/op
+BenchmarkThreadUnsafeLRU_Find-12         	20000000	       178 ns/op
+BenchmarkThreadUnsafeLRU_Find2-12        	10000000	       177 ns/op
+BenchmarkThreadUnsafeLRU_Find3-12        	30000000	        34.7 ns/op
+BenchmarkThreadUnsafeLRU_Remove-12       	20000000	       177 ns/op
+BenchmarkThreadUnsafeLRU_Remove2-12      	10000000	       178 ns/op
+BenchmarkThreadUnsafeLRU_Remove3-12      	50000000	        34.4 ns/op
+BenchmarkThreadUnsafeLRU_Iterator-12     	   10000	    149954 ns/op
+BenchmarkThreadUnsafeLRU_Iterator2-12    	 1000000	      2343 ns/op
+BenchmarkThreadUnsafeLRU_Iter-12         	   10000	    152086 ns/op
+BenchmarkThreadUnsafeLRU_Iter2-12        	 1000000	      1803 ns/op
 ```
