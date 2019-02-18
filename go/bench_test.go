@@ -54,6 +54,14 @@ func benchFind(b *testing.B, lru LRUCache) {
 	}
 }
 
+func benchRemove(b *testing.B, lru LRUCache) {
+	nums := nrand(b.N)
+	b.ResetTimer()
+	for _, v := range nums {
+		lru.Find(v)
+	}
+}
+
 func benchIterator(b *testing.B, lru LRUCache) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -90,6 +98,11 @@ func BenchmarkThreadSafeLRU_Find2(b *testing.B) {
 	benchFind(b, a)
 }
 
+func BenchmarkThreadSafeLRU_Remove(b *testing.B) {
+	a := makeThreadSafeLRU(b.N)
+	benchRemove(b, a)
+}
+
 func BenchmarkThreadSafeLRU_Iterator(b *testing.B) {
 	a := makeThreadSafeLRU(b.N)
 	benchIterator(b, a)
@@ -120,6 +133,11 @@ func BenchmarkThreadUnsafeLRU_Find(b *testing.B) {
 func BenchmarkThreadUnsafeLRU_Find2(b *testing.B) {
 	a := makeThreadUnsafeLRU(b.N)
 	benchFind(b, a)
+}
+
+func BenchmarkThreadUnsafeLRU_Remove(b *testing.B) {
+	a := makeThreadUnsafeLRU(b.N)
+	benchRemove(b, a)
 }
 
 func BenchmarkThreadUnsafeLRU_Iterator(b *testing.B) {

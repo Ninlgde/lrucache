@@ -65,16 +65,18 @@ Benchmark on MacBook Pro 2018
 goos: darwin
 goarch: amd64
 pkg: github.com/Ninlgde/lrucache/go
-BenchmarkThreadSafeLRU_Add-12           	 5000000	       309 ns/op
-BenchmarkThreadSafeLRU_Size-12          	30000000	        43.0 ns/op
-BenchmarkThreadSafeLRU_Find-12          	10000000	       227 ns/op
-BenchmarkThreadSafeLRU_Find2-12         	10000000	       295 ns/op
-BenchmarkThreadSafeLRU_Iterator-12      	   10000	    171471 ns/op
-BenchmarkThreadSafeLRU_Itera-12         	   10000	    185410 ns/op
-BenchmarkThreadUnsafeLRU_Add-12         	 5000000	       292 ns/op
-BenchmarkThreadUnsafeLRU_Size-12        	2000000000	         1.56 ns/op
-BenchmarkThreadUnsafeLRU_Find-12        	10000000	       191 ns/op
-BenchmarkThreadUnsafeLRU_Find2-12       	10000000	       178 ns/op
-BenchmarkThreadUnsafeLRU_Iterator-12    	   10000	    141394 ns/op
-BenchmarkThreadUnsafeLRU_Iter-12        	   10000	    135945 ns/op
+BenchmarkThreadSafeLRU_Add-12           	 3000000	       333 ns/op
+BenchmarkThreadSafeLRU_Size-12          	30000000	      41.8 ns/op
+BenchmarkThreadSafeLRU_Find-12          	10000000	       224 ns/op
+BenchmarkThreadSafeLRU_Find2-12         	10000000	       232 ns/op
+BenchmarkThreadSafeLRU_Remove-12        	10000000	       227 ns/op
+BenchmarkThreadSafeLRU_Iterator-12      	   10000	    144976 ns/op
+BenchmarkThreadSafeLRU_Itera-12         	   10000	    121500 ns/op
+BenchmarkThreadUnsafeLRU_Add-12         	 5000000	       232 ns/op
+BenchmarkThreadUnsafeLRU_Size-12          2000000000	      1.49 ns/op
+BenchmarkThreadUnsafeLRU_Find-12        	10000000	       167 ns/op
+BenchmarkThreadUnsafeLRU_Find2-12       	10000000	       173 ns/op
+BenchmarkThreadUnsafeLRU_Remove-12      	10000000	       176 ns/op
+BenchmarkThreadUnsafeLRU_Iterator-12    	   10000	    135897 ns/op
+BenchmarkThreadUnsafeLRU_Iter-12        	   10000	    131905 ns/op
 ```
