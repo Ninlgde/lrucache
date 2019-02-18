@@ -194,16 +194,12 @@ func TestThreadSafeLRU(t *testing.T) {
 			case 0:
 				a.Add(i, i)
 				addCount++
-				break
 			case 1:
 				findResult = append(findResult, a.Find(i))
-				break
 			case 2:
 				removeResult = append(removeResult, a.Remove(i))
-				break
 			case 3:
 				iterResult = append(iterResult, a.Iter(true))
-				break
 			}
 			wg.Done()
 		}(i)
