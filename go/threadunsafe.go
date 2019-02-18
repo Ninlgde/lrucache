@@ -185,12 +185,15 @@ func (cache *threadUnsafeLRU) add(k lruKey, v lruValue, notinc bool) {
 			// 为提高效率，每次从头部淘汰整体的1/4
 			expires := cache.cap >> 2
 			for i := 0; i < expires; i++ {
-				rmkey := cache.head.next.key // 找到对应的key
-				delete(cache.dict, rmkey)    // 一定要把map里的key给删除
+				rmnode := cache.head.next
+				rmkey := rmnode.key       // 找到对应的key
+				delete(cache.dict, rmkey) // 一定要把map里的key给删除
 
 				// head指针后移一位
-				cache.head.next = cache.head.next.next
+				cache.head.next = rmnode.next
 				cache.head.prev = cache.head
+
+				deleteNode(rmnode)
 			}
 			cache.len -= expires // size减小到删除后的真实size
 		}
@@ -225,14 +228,16 @@ func (cache *threadUnsafeLRU) find(k lruKey, v lruValue) lruValue {
 		node.next.prev = node.prev // 后的前是前
 
 		// add 的时候有find操作，会改变value
-		new := node.value
+		value := node.value
 		if v != nil {
-			new = v
+			value = v
 		}
 
+		deleteNode(node)
+
 		// 2.再添加到尾部
-		cache.add(k, new, true) // 因为命中了 所以size不自增
-		return node.value
+		cache.add(k, value, true) // 因为命中了 所以size不自增
+		return value
 	}
 	return nil // 没有命中返回nil
 }
@@ -254,6 +259,34 @@ func (cache *threadUnsafeLRU) poptail(k lruKey) lruValue {
 	cache.tail.prev = node.prev
 	node.prev.next = cache.tail
 
+	value := node.value
+	deleteNode(node)
+
 	cache.len--
-	return node.value
+	return value
 }
+
+/**
+还不太清楚go的垃圾回收机制
+理论上要把node所有引用的地方都制空才会被回收吧
+*/
+func deleteNode(node *lruNode) bool {
+	node.value = nil
+	node.key = nil
+	node.next = nil
+	node.prev = nil
+	_ = node
+	return true
+}
+
+// 经过下面的方法测试，在不添加deleteNode时，发生了内存泄漏，添加后内存泄漏问题消失
+//func main() {
+//
+//	cache := lru.NewLRUCache(100)
+//
+//	i:=0
+//	for {
+//		cache.Add(i,i)
+//		i++
+//	}
+//}
