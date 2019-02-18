@@ -73,7 +73,7 @@ BenchmarkThreadSafeLRU_Remove-12        	10000000	       227 ns/op
 BenchmarkThreadSafeLRU_Iterator-12      	   10000	    144976 ns/op
 BenchmarkThreadSafeLRU_Itera-12         	   10000	    121500 ns/op
 BenchmarkThreadUnsafeLRU_Add-12         	 5000000	       232 ns/op
-BenchmarkThreadUnsafeLRU_Size-12          2000000000	      1.49 ns/op
+BenchmarkThreadUnsafeLRU_Size-12              2000000000	      1.49 ns/op
 BenchmarkThreadUnsafeLRU_Find-12        	10000000	       167 ns/op
 BenchmarkThreadUnsafeLRU_Find2-12       	10000000	       173 ns/op
 BenchmarkThreadUnsafeLRU_Remove-12      	10000000	       176 ns/op
