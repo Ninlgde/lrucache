@@ -63,11 +63,11 @@ cost: O(1)(base on map's implement)
 */
 func (cache *threadUnsafeLRU) Add(k lruKey, v lruValue) {
 	// 先查找是否在缓存里，如果有就不添加了
-	if _find(cache, k, v) != nil {
+	if cache.find(k, v) != nil {
 		return
 	}
 	// add
-	_add(cache, k, v, false)
+	cache.add(k, v, false)
 }
 
 /**
@@ -78,7 +78,7 @@ return: value or nil
 cost: O(1)(base on map's implement)
 */
 func (cache *threadUnsafeLRU) Find(k lruKey) lruValue {
-	return _find(cache, k, nil)
+	return cache.find(k, nil)
 }
 
 /**
@@ -164,7 +164,7 @@ k: key
 v: value
 notinc: 是否增加 如果命中的话，只是移动位置，不需要增加size
 */
-func _add(cache *threadUnsafeLRU, k lruKey, v lruValue, notinc bool) {
+func (cache *threadUnsafeLRU) add(k lruKey, v lruValue, notinc bool) {
 	if !notinc {
 		cache.len += 1
 		if cache.len > cache.cap {
@@ -201,7 +201,7 @@ k: key
 v: value add有find操作，有可能改变value
 return: 找到的value or nil
 */
-func _find(cache *threadUnsafeLRU, k lruKey, v lruValue) lruValue {
+func (cache *threadUnsafeLRU) find(k lruKey, v lruValue) lruValue {
 	old, ok := cache.dict[k]
 	if ok {
 		// 命中，将此node移到双向链表的末尾
@@ -215,7 +215,7 @@ func _find(cache *threadUnsafeLRU, k lruKey, v lruValue) lruValue {
 			new = v
 		}
 
-		_add(cache, k, new, true) // 因为命中了 所以size不自增
+		cache.add(k, new, true) // 因为命中了 所以size不自增
 		return node.value
 	}
 	return nil // 没有命中返回nil
