@@ -1,5 +1,5 @@
 # Ninlgde LUR Cache
-this is a very fast LRU cache implemented by Ninlgde in 2019
+This is a very fast LRU cache implemented by Ninlgde in 2019
 
 ## Installation
 To install LRU cache package, you need to install Go and set your Go workspace first.
@@ -56,7 +56,7 @@ func main() {
 }
 ```
 
-more example see the test go files
+More examples see the test go files
 
 ## Benchmark
 Benchmark on MacBook Pro 2018
