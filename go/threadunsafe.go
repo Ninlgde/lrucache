@@ -291,5 +291,5 @@ func freeNode(node *lruNode) lruValue {
 //}
 // 后记：内存泄漏时由于添加的bug导致的，跟freeNode没关系
 // 需要好好看看golang的内存回收了！！！
-// 后记的后记：
+// 后记2：
 // 		golang gc： http://legendtkl.com/2017/04/28/golang-gc/
