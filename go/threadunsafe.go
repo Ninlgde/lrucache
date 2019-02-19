@@ -195,10 +195,6 @@ func (cache *threadUnsafeLRU) add(k lruKey, v lruValue, notinc bool) {
 			rmkey := rmnode.key       // 找到对应的key
 			delete(cache.dict, rmkey) // 一定要把map里的key给删除
 
-			// head指针后移一位
-			cache.head.next = rmnode.next
-			cache.head.next.prev = cache.head
-
 			freeNode(rmnode)
 			//}
 			cache.len -= expires // size减小到删除后的真实size
@@ -225,21 +221,15 @@ v: value add有find操作，有可能改变value
 return: 找到的value or nil
 */
 func (cache *threadUnsafeLRU) find(k lruKey, v lruValue) lruValue {
-	old, ok := cache.dict[k]
+	node, ok := cache.dict[k]
 	if ok {
 		// 命中，将此node移到双向链表的末尾
 		// 1.先从原位置删除
-		node := old
-		node.prev.next = node.next // 前的后是后
-		node.next.prev = node.prev // 后的前是前
-
+		value := freeNode(node)
 		// add 的时候有find操作，会改变value
-		value := node.value
 		if v != nil {
 			value = v
 		}
-
-		freeNode(node)
 
 		// 2.再添加到尾部
 		cache.add(k, value, true) // 因为命中了 所以size不自增
@@ -261,12 +251,8 @@ func (cache *threadUnsafeLRU) poptail(k lruKey) lruValue {
 	node := cache.tail.prev
 	rmkey := node.key
 	delete(cache.dict, rmkey)
-	// tail 指针向前移动一位
-	cache.tail.prev = node.prev
-	node.prev.next = cache.tail
 
-	value := node.value
-	freeNode(node)
+	value := freeNode(node)
 
 	cache.len--
 	return value
@@ -276,13 +262,20 @@ func (cache *threadUnsafeLRU) poptail(k lruKey) lruValue {
 还不太清楚go的垃圾回收机制
 理论上要把node所有引用的地方都制空才会被回收吧
 */
-func freeNode(node *lruNode) bool {
+func freeNode(node *lruNode) lruValue {
+	// 把指针操作也放到里面
+	node.next.prev = node.prev
+	node.prev.next = node.next
+	v := node.value
+	// 把node的引用也置空
+	// 其实没有必要，golang的回收是检查对象是否被引用，上面的操作已经完成了解引用
+	// 所以下面理论上不需要，但还是加上吧
 	node.value = nil
 	node.key = nil
 	node.next = nil
 	node.prev = nil
 	_ = node
-	return true
+	return v
 }
 
 // 经过下面的方法测试，在不添加freeNode时，发生了内存泄漏，添加后内存泄漏问题消失
@@ -298,3 +291,5 @@ func freeNode(node *lruNode) bool {
 //}
 // 后记：内存泄漏时由于添加的bug导致的，跟freeNode没关系
 // 需要好好看看golang的内存回收了！！！
+// 后记的后记：
+// 		golang gc： http://legendtkl.com/2017/04/28/golang-gc/
