@@ -296,3 +296,5 @@ func deleteNode(node *lruNode) bool {
 //		i++
 //	}
 //}
+// 后记：内存泄漏时由于添加的bug导致的，跟deleteNode没关系
+// 需要好好看看golang的内存回收了！！！
