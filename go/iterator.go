@@ -1,5 +1,7 @@
 package lru
 
+// code from : github.com/deckarep/golang-set
+
 type Iterator struct {
 	C    <-chan lruPair
 	stop chan struct{}
