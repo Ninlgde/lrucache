@@ -199,7 +199,7 @@ func (cache *threadUnsafeLRU) add(k lruKey, v lruValue, notinc bool) {
 			cache.head.next = rmnode.next
 			cache.head.next.prev = cache.head
 
-			deleteNode(rmnode)
+			freeNode(rmnode)
 			//}
 			cache.len -= expires // size减小到删除后的真实size
 		}
@@ -239,7 +239,7 @@ func (cache *threadUnsafeLRU) find(k lruKey, v lruValue) lruValue {
 			value = v
 		}
 
-		deleteNode(node)
+		freeNode(node)
 
 		// 2.再添加到尾部
 		cache.add(k, value, true) // 因为命中了 所以size不自增
@@ -266,7 +266,7 @@ func (cache *threadUnsafeLRU) poptail(k lruKey) lruValue {
 	node.prev.next = cache.tail
 
 	value := node.value
-	deleteNode(node)
+	freeNode(node)
 
 	cache.len--
 	return value
@@ -276,7 +276,7 @@ func (cache *threadUnsafeLRU) poptail(k lruKey) lruValue {
 还不太清楚go的垃圾回收机制
 理论上要把node所有引用的地方都制空才会被回收吧
 */
-func deleteNode(node *lruNode) bool {
+func freeNode(node *lruNode) bool {
 	node.value = nil
 	node.key = nil
 	node.next = nil
@@ -285,7 +285,7 @@ func deleteNode(node *lruNode) bool {
 	return true
 }
 
-// 经过下面的方法测试，在不添加deleteNode时，发生了内存泄漏，添加后内存泄漏问题消失
+// 经过下面的方法测试，在不添加freeNode时，发生了内存泄漏，添加后内存泄漏问题消失
 //func main() {
 //
 //	cache := lru.NewLRUCache(100)
@@ -296,5 +296,5 @@ func deleteNode(node *lruNode) bool {
 //		i++
 //	}
 //}
-// 后记：内存泄漏时由于添加的bug导致的，跟deleteNode没关系
+// 后记：内存泄漏时由于添加的bug导致的，跟freeNode没关系
 // 需要好好看看golang的内存回收了！！！
