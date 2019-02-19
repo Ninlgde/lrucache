@@ -196,13 +196,13 @@ func (cache *threadUnsafeLRU) add(k lruKey, v lruValue, notinc bool) {
 			rmkey := rmnode.key       // 找到对应的key
 			delete(cache.dict, rmkey) // 一定要把map里的key给删除
 
-			cache.freeNode(rmnode)
+			cache.freenode(rmnode)
 			//}
 			cache.len -= expires // size减小到删除后的真实size
 		}
 	}
 	// 创建node，并添加到尾部和map中
-	node := cache.newNode(k, v, cache.tail, cache.tail.prev)
+	node := cache.newnode(k, v, cache.tail, cache.tail.prev)
 
 	cache.tail.prev.next = node
 	cache.tail.prev = node
@@ -221,7 +221,7 @@ func (cache *threadUnsafeLRU) find(k lruKey, v lruValue) lruValue {
 	if ok {
 		// 命中，将此node移到双向链表的末尾
 		// 1.先从原位置删除
-		value := cache.freeNode(node)
+		value := cache.freenode(node)
 		// add 的时候有find操作，会改变value
 		if v != nil {
 			value = v
@@ -248,7 +248,7 @@ func (cache *threadUnsafeLRU) poptail(k lruKey) lruValue {
 	rmkey := node.key
 	delete(cache.dict, rmkey)
 
-	value := cache.freeNode(node)
+	value := cache.freenode(node)
 
 	cache.len--
 	return value
@@ -260,7 +260,7 @@ func (cache *threadUnsafeLRU) poptail(k lruKey) lruValue {
 提高运行效率
 同时减少了gc
 */
-func (cache *threadUnsafeLRU) newNode(k lruKey, v lruValue, next, prev *lruNode) *lruNode {
+func (cache *threadUnsafeLRU) newnode(k lruKey, v lruValue, next, prev *lruNode) *lruNode {
 	if len(cache.pool) > 0 {
 		// 从头部去出一个node
 		node := cache.pool[0]
@@ -286,7 +286,7 @@ func (cache *threadUnsafeLRU) newNode(k lruKey, v lruValue, next, prev *lruNode)
 还不太清楚go的垃圾回收机制
 理论上要把node所有引用的地方都制空才会被回收吧
 */
-func (cache *threadUnsafeLRU) freeNode(node *lruNode) lruValue {
+func (cache *threadUnsafeLRU) freenode(node *lruNode) lruValue {
 	// 把指针操作也放到里面
 	node.next.prev = node.prev
 	node.prev.next = node.next
@@ -302,7 +302,7 @@ func (cache *threadUnsafeLRU) freeNode(node *lruNode) lruValue {
 	return v
 }
 
-// 经过下面的方法测试，在不添加freeNode时，发生了内存泄漏，添加后内存泄漏问题消失
+// 经过下面的方法测试，在不添加freenode时，发生了内存泄漏，添加后内存泄漏问题消失
 //func main() {
 //
 //	cache := lru.NewLRUCache(100)
@@ -313,7 +313,7 @@ func (cache *threadUnsafeLRU) freeNode(node *lruNode) lruValue {
 //		i++
 //	}
 //}
-// 后记：内存泄漏时由于添加的bug导致的，跟freeNode没关系
+// 后记：内存泄漏时由于添加的bug导致的，跟freenode没关系
 // 需要好好看看golang的内存回收了！！！
 // 后记2：
 // 		golang gc： http://legendtkl.com/2017/04/28/golang-gc/
