@@ -22,6 +22,7 @@ type threadUnsafeLRU struct {
 	dict map[lruKey]*lruNode // 存放数据的 map，提高查找效率
 	len  int                 // 当前数量
 	cap  int                 // 总量
+	pool []*lruNode          // node的对象池，减少gc
 }
 
 func newThreadUnsafeLRU() *threadUnsafeLRU {
@@ -51,7 +52,7 @@ func (cache *threadUnsafeLRU) Create(cap int) {
 	cache.dict = make(map[lruKey]*lruNode) // init map
 	cache.len = 0
 	cache.cap = cap
-
+	cache.pool = make([]*lruNode, 0, 1) // 大设1吧，理论上不会超过这个值
 }
 
 /**
@@ -195,18 +196,13 @@ func (cache *threadUnsafeLRU) add(k lruKey, v lruValue, notinc bool) {
 			rmkey := rmnode.key       // 找到对应的key
 			delete(cache.dict, rmkey) // 一定要把map里的key给删除
 
-			freeNode(rmnode)
+			cache.freeNode(rmnode)
 			//}
 			cache.len -= expires // size减小到删除后的真实size
 		}
 	}
 	// 创建node，并添加到尾部和map中
-	node := &lruNode{
-		next:  cache.tail,
-		prev:  cache.tail.prev,
-		value: v,
-		key:   k,
-	}
+	node := cache.newNode(k, v, cache.tail, cache.tail.prev)
 
 	cache.tail.prev.next = node
 	cache.tail.prev = node
@@ -225,7 +221,7 @@ func (cache *threadUnsafeLRU) find(k lruKey, v lruValue) lruValue {
 	if ok {
 		// 命中，将此node移到双向链表的末尾
 		// 1.先从原位置删除
-		value := freeNode(node)
+		value := cache.freeNode(node)
 		// add 的时候有find操作，会改变value
 		if v != nil {
 			value = v
@@ -252,17 +248,45 @@ func (cache *threadUnsafeLRU) poptail(k lruKey) lruValue {
 	rmkey := node.key
 	delete(cache.dict, rmkey)
 
-	value := freeNode(node)
+	value := cache.freeNode(node)
 
 	cache.len--
 	return value
 }
 
 /**
+新建node
+使用了对象池，减少对象的创建
+提高运行效率
+同时减少了gc
+*/
+func (cache *threadUnsafeLRU) newNode(k lruKey, v lruValue, next, prev *lruNode) *lruNode {
+	if len(cache.pool) > 0 {
+		// 从头部去出一个node
+		node := cache.pool[0]
+		cache.pool = cache.pool[1:]
+		node.key = k
+		node.value = v
+		node.prev = prev
+		node.next = next
+
+		return node
+	}
+	// new a node
+	node := &lruNode{
+		next:  next,
+		prev:  prev,
+		value: v,
+		key:   k,
+	}
+	return node
+}
+
+/**
 还不太清楚go的垃圾回收机制
 理论上要把node所有引用的地方都制空才会被回收吧
 */
-func freeNode(node *lruNode) lruValue {
+func (cache *threadUnsafeLRU) freeNode(node *lruNode) lruValue {
 	// 把指针操作也放到里面
 	node.next.prev = node.prev
 	node.prev.next = node.next
@@ -274,7 +298,7 @@ func freeNode(node *lruNode) lruValue {
 	node.key = nil
 	node.next = nil
 	node.prev = nil
-	_ = node
+	cache.pool = append(cache.pool, node)
 	return v
 }
 
