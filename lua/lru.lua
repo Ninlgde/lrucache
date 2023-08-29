@@ -8,11 +8,6 @@ local LRUCache = function(max)
 	tail.prev = head -- 头尾互指
 	local map = {} -- 真正存放数据的map
 	local size = 0 -- 缓存的大小
-	local node_mt = { -- node to srting
-		__tostring = function(t)
-			return "{" .. t.key .. ":" .. t.value .. "}"
-		end,
-	}
 
 	-- 添加一个元素
 	-- notinc size是否增加1 ：如果命中的话，只是移动位置，不需要增加size
@@ -77,15 +72,20 @@ local LRUCache = function(max)
 			local d = reverse and "next" or "prev" -- 方向是啥
 			return function()
 				p = p ~= nil and p[d] or nil
-				return p.data ~= nil and setmetatable({ key = p.key, value = p.data }, node_mt) or nil
+				return p.key ~= nil and p.key or nil, p.data ~= nil and p.data or nil
 			end
 		end,
 	}
 end
 
--- more lua style <lua 5.4.6> 
+-- more lua style
 local lrucache = function(max)
-	local _lru_mt = setmetatable({ _impl = LRUCache(max or 10) }, {
+	local _lru_mt = setmetatable({
+		_impl = LRUCache(max or 10),
+		iterator = function(self, reverse)
+			return self._impl.iterator(reverse)
+		end,
+	}, {
 		__index = function(t, k)
 			return t._impl.find(k)
 		end,
