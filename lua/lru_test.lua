@@ -18,8 +18,13 @@ print(cache.find("b"))
 print("len:", cache.size())
 
 print("\n遍历cache")
-for k in cache.iterator() do
-  print(k)
+for k, v in cache.iterator() do
+    print(k, v)
+end
+
+print("\n遍历cache")
+for k, v in cache.iterator(true) do
+    print(k, v)
 end
 
 print("\n\nmetatable lru")
@@ -41,14 +46,19 @@ print(a.b)
 print("len:", #a)
 
 print("\n遍历cache")
-for k in pairs(a) do
-  print(k)
+for k, v in pairs(a) do
+    print(k, v)
+end
+
+print("\n遍历cache")
+for k, v in a:iterator(true) do
+    print(k, v)
 end
 
 local b = lru.lrucache()
 print("\n遍历cache", #b)
-for k in pairs(b) do
-  print(k)
+for k, v in pairs(b) do
+    print(k, v)
 end
 
 print("len:", #b)
